@@ -1,9 +1,9 @@
 <?php
 
 use App\Models\Employee;
-use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Database\Migrations\Migration;
 
 return new class extends Migration
 {
@@ -22,7 +22,10 @@ return new class extends Migration
       $table->integer('adaptability')->default(0);
       $table->integer('talent')->default(0);
       $table->text('description');
-      $table->foreignIdFor(Employee::class)->constrained()->cascadeOnDelete()->unique();
+      $table->foreignIdFor(Employee::class)->constrained()->cascadeOnDelete();
+      $table->unique([
+        'employee_id'
+      ]);
     });
   }
 

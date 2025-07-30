@@ -2,25 +2,25 @@
 
 namespace App\Http\Controllers;
 
-use App\Enums\ApprovalType;
-use App\Enums\StatusType;
-use App\Exports\SummaryExport;
+use App\Models\Topic;
 use App\Models\Employee;
+use App\Models\Position;
+use App\Enums\StatusType;
+use Illuminate\View\View;
 use App\Models\Evaluation;
+use App\Models\Department;
+use App\Enums\ApprovalType;
+use Illuminate\Support\Str;
+use Illuminate\Http\Request;
+use App\Exports\SummaryExport;
+use Illuminate\Validation\Rule;
+use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Validation\Rules\Enum;
+use Maatwebsite\Excel\Excel as ExcelFormat;
 use App\Http\Requests\StoreEvaluationRequest;
 use App\Http\Requests\UpdateEvaluationRequest;
-use App\Models\Department;
-use App\Models\Position;
-use App\Models\Topic;
-use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
-use Illuminate\Validation\Rules\Enum;
-use Illuminate\View\View;
-use Illuminate\Support\Str;
 use Illuminate\Pagination\LengthAwarePaginator;
-use Maatwebsite\Excel\Facades\Excel;
-use Maatwebsite\Excel\Excel as ExcelFormat;
 
 class EvaluationController extends Controller
 {
@@ -252,12 +252,14 @@ class EvaluationController extends Controller
    */
   public function assign(Request $request, Evaluation $evaluation): RedirectResponse
   {
+    $period = session('period_id');
+
     $validated = $request->validate([
       'employee_id' => [
         'required',
         'exists:employees,id',
-        Rule::unique('employee_evaluations')->where(function ($query) use ($evaluation) {
-          return $query->where('evaluation_id', $evaluation->id);
+        Rule::unique('employee_evaluations')->where(function ($query) use ($evaluation, $period) {
+          return $query->where('evaluation_id', $evaluation->id)->where('period_id', $period);
         }),
       ],
     ]);
@@ -265,7 +267,7 @@ class EvaluationController extends Controller
     $id = $validated['employee_id'];
     $evaluation->employees()->attach($id, [
       'score' => 0,
-      'period_id' => session('period_id')
+      'period_id' => $period
     ]);
 
     return back()->with('success', 'Employee assigned successfully!');

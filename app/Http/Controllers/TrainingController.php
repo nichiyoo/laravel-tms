@@ -212,12 +212,14 @@ class TrainingController extends Controller
     $full = $training->employees->count() >= $training->capacity;
     if ($full) return back()->with('error', 'Training capacity reached!');
 
+    $period = session('period_id');
+
     $validated = $request->validate([
       'employee_id' => [
         'required',
         'exists:employees,id',
-        Rule::unique('employee_trainings')->where(function ($query) use ($training) {
-          return $query->where('training_id', $training->id)->where('period_id', session('period_id'));
+        Rule::unique('employee_trainings')->where(function ($query) use ($training, $period) {
+          return $query->where('training_id', $training->id)->where('period_id', $period);
         }),
       ],
     ]);
@@ -226,7 +228,7 @@ class TrainingController extends Controller
     $training->employees()->attach($id, [
       'score' => 0,
       'email_sent' => false,
-      'period_id' => session('period_id')
+      'period_id' => $period
     ]);
 
     return back()->with('success', 'Employee assigned successfully!');

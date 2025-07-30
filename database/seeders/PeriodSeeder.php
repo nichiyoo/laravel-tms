@@ -2,10 +2,10 @@
 
 namespace Database\Seeders;
 
-use App\Enums\SemesterType;
 use App\Models\Period;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Enums\SemesterType;
 use Illuminate\Database\Seeder;
+use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 
 class PeriodSeeder extends Seeder
 {
@@ -16,7 +16,12 @@ class PeriodSeeder extends Seeder
   {
     Period::create([
       'year' => now()->year,
-      'semester' => now()->month > 6 ? SemesterType::ODD : SemesterType::EVEN
+      'semester' => SemesterType::ODD
+    ]);
+
+    Period::create([
+      'year' => now()->year,
+      'semester' => SemesterType::EVEN
     ]);
   }
 }
